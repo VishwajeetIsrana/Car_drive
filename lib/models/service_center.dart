@@ -4,8 +4,14 @@ class ServiceCenter {
   final String name;
   final LatLng location;
   final double? distanceMeters;
+  final String phoneNumber;
 
-  ServiceCenter({required this.name, required this.location, this.distanceMeters});
+  ServiceCenter({
+    required this.name,
+    required this.location,
+    this.distanceMeters,
+    required this.phoneNumber,
+  });
 }
 
 /// Generate a few sample service centers around [base].
@@ -18,14 +24,36 @@ List<ServiceCenter> generateNearbyCenters(LatLng base) {
     LatLng(-0.006, -0.012),
   ];
 
-  final names = ['QuickFix Auto', 'City Service Center', 'Speedy Repair', 'Main St. Garage', 'Ace Mechanics'];
+  final names = [
+    'QuickFix Auto',
+    'City Service Center',
+    'Speedy Repair',
+    'Main St. Garage',
+    'Ace Mechanics',
+  ];
+  final phones = [
+    '+919876543210',
+    '+919876543211',
+    '+919876543212',
+    '+919876543213',
+    '+919876543214',
+    '+919876543215',
+  ];
 
   final Distance dist = Distance();
 
   return List.generate(offsets.length, (i) {
     final off = offsets[i];
-    final loc = LatLng(base.latitude + off.latitude, base.longitude + off.longitude);
+    final loc = LatLng(
+      base.latitude + off.latitude,
+      base.longitude + off.longitude,
+    );
     final meters = dist.as(LengthUnit.Meter, base, loc);
-    return ServiceCenter(name: names[i], location: loc, distanceMeters: meters);
+    return ServiceCenter(
+      name: names[i],
+      location: loc,
+      distanceMeters: meters,
+      phoneNumber: phones[i],
+    );
   });
 }

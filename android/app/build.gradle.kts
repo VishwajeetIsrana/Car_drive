@@ -5,6 +5,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.core:core:1.13.1")
+        force("androidx.core:core-ktx:1.13.1")
+        force("androidx.browser:browser:1.8.0")
+    }
+}
+
 android {
     namespace = "com.example.car_drive"
     compileSdk = flutter.compileSdkVersion
