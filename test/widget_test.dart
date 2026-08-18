@@ -21,28 +21,28 @@ void main() {
     expect(find.text('Car Telematics'), findsOneWidget);
 
     // Verify Bottom Navigation Bar tabs
-    expect(find.text('Vehicle'), findsOneWidget);
-    expect(find.text('Map'), findsOneWidget);
-    expect(find.text('Service'), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Live Map'), findsOneWidget);
+    expect(find.text('Services'), findsOneWidget);
 
     // Verify Vehicle title/card details
     expect(find.text('Tesla Model 3'), findsOneWidget);
-    expect(find.text('Vehicle Health'), findsOneWidget);
+    expect(find.text('Telemetry & Health'), findsOneWidget);
   });
 
   testWidgets('Navigation tab switching works', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    // Switch to Service tab
-    await tester.tap(find.text('Service'));
+    // Switch to Services tab
+    await tester.tap(find.text('Services'));
     await tester.pump();
 
-    expect(find.text('Service Centers'), findsOneWidget);
+    expect(find.text('Service Network'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget); // Search bar
 
-    // Switch back to Vehicle tab
-    await tester.tap(find.text('Vehicle'));
+    // Switch back to Dashboard tab
+    await tester.tap(find.text('Dashboard'));
     await tester.pump();
 
     expect(find.text('Tesla Model 3'), findsOneWidget);
@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pump();
 
-    expect(find.text('Vehicle Locked'), findsOneWidget);
+    expect(find.text('Vehicle Secured'), findsOneWidget);
 
     // Tap Unlock button
     await tester.tap(find.text('Unlock'));

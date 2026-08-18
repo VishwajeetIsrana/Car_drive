@@ -25,8 +25,32 @@ class _CentersPageState extends State<CentersPage> {
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final scheme = Theme.of(context).colorScheme;
             return AlertDialog(
-              title: Text('Book Service at ${center.name}'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Book Service Visit',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    center.name,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,44 +58,93 @@ class _CentersPageState extends State<CentersPage> {
                   Text(
                     center.address,
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: scheme.onSurfaceVariant,
                       fontSize: 13,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.calendar_today),
-                    title: Text(
-                      'Date: ${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}',
+                  const SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    trailing: const Icon(Icons.arrow_drop_down),
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
-                      );
-                      if (picked != null) {
-                        setDialogState(() => selectedDate = picked);
-                      }
-                    },
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      leading: Icon(
+                        Icons.calendar_today_rounded,
+                        color: scheme.primary,
+                      ),
+                      title: const Text(
+                        'Appointment Date',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_drop_down_rounded),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 30),
+                          ),
+                        );
+                        if (picked != null) {
+                          setDialogState(() => selectedDate = picked);
+                        }
+                      },
+                    ),
                   ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.access_time),
-                    title: Text('Time: ${selectedTime.format(context)}'),
-                    trailing: const Icon(Icons.arrow_drop_down),
-                    onTap: () async {
-                      final picked = await showTimePicker(
-                        context: context,
-                        initialTime: selectedTime,
-                      );
-                      if (picked != null) {
-                        setDialogState(() => selectedTime = picked);
-                      }
-                    },
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      leading: Icon(
+                        Icons.access_time_rounded,
+                        color: scheme.primary,
+                      ),
+                      title: const Text(
+                        'Preferred Time',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      subtitle: Text(
+                        selectedTime.format(context),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_drop_down_rounded),
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime,
+                        );
+                        if (picked != null) {
+                          setDialogState(() => selectedTime = picked);
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -81,6 +154,13 @@ class _CentersPageState extends State<CentersPage> {
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                   onPressed: () {
                     Navigator.of(dialogCtx).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -89,6 +169,10 @@ class _CentersPageState extends State<CentersPage> {
                           'Service appointment booked at ${center.name}!',
                         ),
                         backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     );
                   },
@@ -107,69 +191,124 @@ class _CentersPageState extends State<CentersPage> {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Service Centers'), centerTitle: true),
+      appBar: AppBar(title: const Text('Service Network')),
       body: Column(
         children: [
-          // Search Bar & Filter Strip
+          // Modern Search Bar & Pill Filter Strip
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
             child: Column(
               children: [
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search centers or address...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () => setState(() => _searchQuery = ''),
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Container(
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest.withValues(
+                      alpha: 0.6,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  onChanged: (val) => setState(() => _searchQuery = val),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search service centers or location...',
+                      hintStyle: TextStyle(
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: scheme.primary,
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () =>
+                                  setState(() => _searchQuery = ''),
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                    ),
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Sort by:',
+                      'Sort results:',
                       style: TextStyle(
                         fontSize: 13,
+                        fontWeight: FontWeight.w600,
                         color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SegmentedButton<SortOption>(
-                      segments: const [
-                        ButtonSegment(
-                          value: SortOption.distance,
-                          label: Text('Distance'),
-                          icon: Icon(Icons.near_me, size: 16),
+                    Row(
+                      children: [
+                        FilterChip(
+                          selected: _sortOption == SortOption.distance,
+                          label: const Text('Nearest'),
+                          avatar: Icon(
+                            Icons.near_me_rounded,
+                            size: 16,
+                            color: _sortOption == SortOption.distance
+                                ? Colors.white
+                                : scheme.primary,
+                          ),
+                          selectedColor: const Color(0xFF2563EB),
+                          labelStyle: TextStyle(
+                            color: _sortOption == SortOption.distance
+                                ? Colors.white
+                                : scheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          onSelected: (_) => setState(
+                            () => _sortOption = SortOption.distance,
+                          ),
                         ),
-                        ButtonSegment(
-                          value: SortOption.rating,
-                          label: Text('Rating'),
-                          icon: Icon(Icons.star, size: 16),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          selected: _sortOption == SortOption.rating,
+                          label: const Text('Top Rated'),
+                          avatar: Icon(
+                            Icons.star_rounded,
+                            size: 16,
+                            color: _sortOption == SortOption.rating
+                                ? Colors.white
+                                : Colors.amber[700],
+                          ),
+                          selectedColor: const Color(0xFF2563EB),
+                          labelStyle: TextStyle(
+                            color: _sortOption == SortOption.rating
+                                ? Colors.white
+                                : scheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          onSelected: (_) => setState(
+                            () => _sortOption = SortOption.rating,
+                          ),
                         ),
                       ],
-                      selected: {_sortOption},
-                      onSelectionChanged: (Set<SortOption> selected) {
-                        setState(() {
-                          _sortOption = selected.first;
-                        });
-                      },
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
           // Service Centers List
           Expanded(
             child: ValueListenableBuilder<List<ServiceCenter>>(
@@ -181,7 +320,7 @@ class _CentersPageState extends State<CentersPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.location_off,
+                          Icons.location_off_rounded,
                           size: 64,
                           color: scheme.outline,
                         ),
@@ -215,34 +354,36 @@ class _CentersPageState extends State<CentersPage> {
                 }
 
                 return ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   itemCount: filtered.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                   itemBuilder: (context, index) {
                     final center = filtered[index];
                     return Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: scheme.outlineVariant),
-                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                CircleAvatar(
-                                  backgroundColor: scheme.primaryContainer,
-                                  child: Icon(
-                                    Icons.home_repair_service,
-                                    color: scheme.onPrimaryContainer,
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF2563EB,
+                                    ).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.build_circle_rounded,
+                                    color: Color(0xFF2563EB),
+                                    size: 28,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -253,9 +394,10 @@ class _CentersPageState extends State<CentersPage> {
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
+                                          letterSpacing: -0.3,
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: 4),
                                       Text(
                                         center.address,
                                         style: TextStyle(
@@ -263,34 +405,59 @@ class _CentersPageState extends State<CentersPage> {
                                           color: scheme.onSurfaceVariant,
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 8),
                                       Row(
                                         children: [
-                                          Icon(
-                                            Icons.star,
-                                            size: 16,
-                                            color: Colors.amber[700],
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${center.rating}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.amber.withValues(
+                                                alpha: 0.15,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.star_rounded,
+                                                  size: 14,
+                                                  color: Colors.amber[800],
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${center.rating}',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                    color: Colors.amber[900],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          const SizedBox(width: 12),
-                                          Icon(
-                                            Icons.location_on_outlined,
-                                            size: 16,
-                                            color: scheme.primary,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            '${(center.distanceMeters ?? 0).toStringAsFixed(0)}m away',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: scheme.onSurfaceVariant,
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: scheme
+                                                  .surfaceContainerHighest,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              '${(center.distanceMeters ?? 0).toStringAsFixed(0)}m away',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: scheme.onSurfaceVariant,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -300,13 +467,24 @@ class _CentersPageState extends State<CentersPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             Row(
                               children: [
                                 Expanded(
-                                  child: OutlinedButton.icon(
-                                    icon: const Icon(Icons.calendar_month, size: 18),
-                                    label: const Text('Book Service'),
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF2563EB),
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.calendar_month_rounded,
+                                      size: 18,
+                                    ),
+                                    label: const Text('Book Visit'),
                                     onPressed: () => _showBookingDialog(
                                       context,
                                       center,
@@ -315,7 +493,12 @@ class _CentersPageState extends State<CentersPage> {
                                 ),
                                 const SizedBox(width: 8),
                                 IconButton.filledTonal(
-                                  icon: const Icon(Icons.call),
+                                  style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.call_rounded),
                                   onPressed: () async {
                                     final Uri url = Uri(
                                       scheme: 'tel',
@@ -331,11 +514,17 @@ class _CentersPageState extends State<CentersPage> {
                                     }
                                   },
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 6),
                                 IconButton.filledTonal(
-                                  icon: const Icon(Icons.navigation_outlined),
+                                  style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.navigation_rounded),
                                   onPressed: () {
-                                    AppState.instance.targetCenter.value = center;
+                                    AppState.instance.targetCenter.value =
+                                        center;
                                     AppState.instance.selectedTab.value = 1;
                                   },
                                 ),

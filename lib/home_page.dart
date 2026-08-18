@@ -10,54 +10,60 @@ class HomePage extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
         return ValueListenableBuilder<ThemeMode>(
           valueListenable: AppState.instance.themeMode,
           builder: (context, currentMode, _) {
             return Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'App Settings',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'App Settings',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('Appearance Theme'),
-                  const SizedBox(height: 8),
-                  ListTile(
-                    title: const Text('System Default'),
-                    trailing: currentMode == ThemeMode.system
-                        ? const Icon(Icons.check, color: Colors.indigo)
-                        : null,
-                    onTap: () {
-                      AppState.instance.themeMode.value = ThemeMode.system;
-                      Navigator.pop(context);
-                    },
+                  const Text(
+                    'Appearance Mode',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
                   ),
-                  ListTile(
-                    title: const Text('Light Theme'),
-                    trailing: currentMode == ThemeMode.light
-                        ? const Icon(Icons.check, color: Colors.indigo)
-                        : null,
-                    onTap: () {
-                      AppState.instance.themeMode.value = ThemeMode.light;
-                      Navigator.pop(context);
-                    },
+                  const SizedBox(height: 12),
+                  _buildThemeOption(
+                    context,
+                    title: 'System Default',
+                    mode: ThemeMode.system,
+                    current: currentMode,
                   ),
-                  ListTile(
-                    title: const Text('Dark Theme'),
-                    trailing: currentMode == ThemeMode.dark
-                        ? const Icon(Icons.check, color: Colors.indigo)
-                        : null,
-                    onTap: () {
-                      AppState.instance.themeMode.value = ThemeMode.dark;
-                      Navigator.pop(context);
-                    },
+                  _buildThemeOption(
+                    context,
+                    title: 'Light Theme',
+                    mode: ThemeMode.light,
+                    current: currentMode,
+                  ),
+                  _buildThemeOption(
+                    context,
+                    title: 'Dark Theme',
+                    mode: ThemeMode.dark,
+                    current: currentMode,
                   ),
                 ],
               ),
@@ -65,6 +71,41 @@ class HomePage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required String title,
+    required ThemeMode mode,
+    required ThemeMode current,
+  }) {
+    final isSelected = mode == current;
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? primary.withValues(alpha: 0.1) : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected ? primary : Colors.grey.withValues(alpha: 0.2),
+        ),
+      ),
+      child: ListTile(
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? primary : null,
+          ),
+        ),
+        trailing: isSelected ? Icon(Icons.check_circle, color: primary) : null,
+        onTap: () {
+          AppState.instance.themeMode.value = mode;
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 
@@ -76,25 +117,59 @@ class HomePage extends StatelessWidget {
           valueListenable: AppState.instance.tirePressurePSI,
           builder: (context, tires, _) {
             return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
               title: const Row(
                 children: [
-                  Icon(Icons.speed, color: Colors.indigo),
-                  SizedBox(width: 8),
-                  Text('Tire Pressure Details'),
+                  Icon(Icons.speed_rounded, color: Color(0xFF2563EB)),
+                  SizedBox(width: 10),
+                  Text(
+                    'Tire Diagnostics',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: tires.entries.map((e) {
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(e.key),
-                    trailing: Text(
-                      '${e.value} PSI',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          e.key,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${e.value} PSI',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),
@@ -119,35 +194,58 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Car Telematics'),
-        centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showSettingsDialog(context),
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.tune_rounded, size: 20),
+              onPressed: () => _showSettingsDialog(context),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Vehicle Hero / Greeting Card
-            Card(
-              color: scheme.primaryContainer,
+            // Hero Vehicle Banner with Modern Blue Gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: scheme.primary,
-                          child: Icon(
-                            Icons.directions_car,
-                            color: scheme.onPrimary,
-                            size: 32,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Icon(
+                            Icons.directions_car_filled_rounded,
+                            color: Colors.white,
+                            size: 36,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -155,36 +253,39 @@ class HomePage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 'Tesla Model 3',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.bold,
-                                  color: scheme.onPrimaryContainer,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 4),
                               ValueListenableBuilder<LatLng?>(
                                 valueListenable:
                                     AppState.instance.vehicleLocation,
                                 builder: (context, vloc, _) {
-                                  if (vloc == null) {
-                                    return Text(
-                                      'Location: Not synced (Tap map to set)',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: scheme.onPrimaryContainer
-                                            .withValues(alpha: 0.8),
+                                  final text = vloc == null
+                                      ? 'Location not synced'
+                                      : '${vloc.latitude.toStringAsFixed(4)}, ${vloc.longitude.toStringAsFixed(4)}';
+                                  return Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        color: Colors.white70,
+                                        size: 14,
                                       ),
-                                    );
-                                  }
-                                  return Text(
-                                    'Location: ${vloc.latitude.toStringAsFixed(4)}, ${vloc.longitude.toStringAsFixed(4)}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: scheme.onPrimaryContainer
-                                          .withValues(alpha: 0.8),
-                                    ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        text,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
                                   );
                                 },
                               ),
@@ -193,52 +294,73 @@ class HomePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    // Quick Remote Lock Toggle
+                    const SizedBox(height: 24),
+                    // Quick Remote Lock Toggle Widget
                     ValueListenableBuilder<bool>(
                       valueListenable: AppState.instance.isLocked,
                       builder: (context, locked, _) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                            horizontal: 20,
+                            vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: scheme.surface,
-                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
-                                  Icon(
-                                    locked ? Icons.lock : Icons.lock_open,
-                                    color: locked ? Colors.green : Colors.red,
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: locked
+                                          ? Colors.green.withValues(alpha: 0.2)
+                                          : Colors.red.withValues(alpha: 0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      locked
+                                          ? Icons.lock_rounded
+                                          : Icons.lock_open_rounded,
+                                      color: locked
+                                          ? Colors.greenAccent
+                                          : Colors.redAccent,
+                                      size: 20,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    locked ? 'Vehicle Locked' : 'Vehicle Unlocked',
+                                    locked
+                                        ? 'Vehicle Secured'
+                                        : 'Vehicle Unlocked',
                                     style: const TextStyle(
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ],
                               ),
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: locked
-                                      ? scheme.errorContainer
-                                      : Colors.green.shade100,
-                                  foregroundColor: locked
-                                      ? scheme.onErrorContainer
-                                      : Colors.green.shade900,
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF1E40AF),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
                                 ),
                                 icon: Icon(
                                   locked
-                                      ? Icons.lock_open
-                                      : Icons.lock_outline,
-                                  size: 18,
+                                      ? Icons.lock_open_rounded
+                                      : Icons.lock_rounded,
+                                  size: 16,
                                 ),
                                 label: Text(locked ? 'Unlock' : 'Lock'),
                                 onPressed: () {
@@ -265,25 +387,25 @@ class HomePage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Vehicle Health Dashboard Grid
-            Text(
-              'Vehicle Health',
+            // Vehicle Telemetry Metrics Grid
+            const Text(
+              'Telemetry & Health',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: scheme.primary,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
-                // Battery / Fuel Card
+                // Battery Metric Card
                 Expanded(
                   child: Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: ValueListenableBuilder<double>(
                         valueListenable: AppState.instance.batteryLevel,
                         builder: (context, battery, _) {
@@ -294,42 +416,64 @@ class HomePage extends StatelessWidget {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Row(
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Icon(
-                                        Icons.battery_charging_full,
-                                        color: Colors.green,
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.bolt_rounded,
+                                          color: Colors.green,
+                                          size: 20,
+                                        ),
                                       ),
-                                      SizedBox(width: 8),
                                       Text(
-                                        'Battery',
+                                        '~$range km',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: scheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 16),
                                   Text(
                                     '$pct%',
                                     style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -1,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  LinearProgressIndicator(
-                                    value: battery,
-                                    color: Colors.green,
-                                    backgroundColor:
-                                        Colors.green.withValues(alpha: 0.2),
+                                  const SizedBox(height: 6),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: LinearProgressIndicator(
+                                      value: battery,
+                                      minHeight: 6,
+                                      color: Colors.green,
+                                      backgroundColor: Colors.green.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    'Range: ~$range km',
+                                  const Text(
+                                    'Battery Level',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: scheme.onSurfaceVariant,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
@@ -341,63 +485,80 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Tire Pressure Card
+                const SizedBox(width: 14),
+                // Tire Pressure Metric Card
                 Expanded(
                   child: InkWell(
                     onTap: () => _showTirePressureDialog(context),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(24),
                     child: Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Icon(Icons.speed, color: Colors.blue),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Tire Pressure',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF2563EB,
+                                    ).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.speed_rounded,
+                                    color: Color(0xFF2563EB),
+                                    size: 20,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Text(
+                                    'Optimal',
+                                    style: TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             const Text(
                               '32 PSI',
                               style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'Optimal',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'All 4 Tires Normal',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Tap for details',
+                              'View Details ›',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: scheme.primary,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -409,70 +570,73 @@ class HomePage extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Nearest Service Center card
-            Text(
-              'Nearest Service Center',
+            // Service Quick Spotlight
+            const Text(
+              'Nearest Assistance',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: scheme.primary,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: scheme.outlineVariant),
-              ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.green.withValues(alpha: 0.1),
-                      child: const Icon(
-                        Icons.home_repair_service,
-                        color: Colors.green,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ValueListenableBuilder<List<ServiceCenter>>(
-                        valueListenable: AppState.instance.centers,
-                        builder: (context, centers, _) {
-                          if (centers.isEmpty) {
-                            return const Text(
-                              'No centers nearby. Tap Map to refresh.',
-                              style: TextStyle(color: Colors.grey),
-                            );
-                          }
+                padding: const EdgeInsets.all(20.0),
+                child: ValueListenableBuilder<List<ServiceCenter>>(
+                  valueListenable: AppState.instance.centers,
+                  builder: (context, centers, _) {
+                    if (centers.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No centers nearby. Tap Map to refresh location.',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      );
+                    }
 
-                          final nearest = centers.reduce(
-                            (a, b) =>
-                                (a.distanceMeters ?? double.infinity) <
-                                        (b.distanceMeters ?? double.infinity)
-                                    ? a
-                                    : b,
-                          );
+                    final nearest = centers.reduce(
+                      (a, b) =>
+                          (a.distanceMeters ?? double.infinity) <
+                                  (b.distanceMeters ?? double.infinity)
+                              ? a
+                              : b,
+                    );
 
-                          return Column(
+                    return Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: const Icon(
+                            Icons.build_circle_rounded,
+                            color: Colors.green,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 nearest.name,
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Icon(
-                                    Icons.star,
-                                    size: 14,
+                                    Icons.star_rounded,
+                                    size: 16,
                                     color: Colors.amber[700],
                                   ),
                                   const SizedBox(width: 4),
@@ -494,67 +658,74 @@ class HomePage extends StatelessWidget {
                                 ],
                               ),
                             ],
-                          );
-                        },
-                      ),
-                    ),
-                    IconButton.filledTonal(
-                      icon: const Icon(Icons.navigation_outlined),
-                      onPressed: () {
-                        final centers = AppState.instance.centers.value;
-                        if (centers.isEmpty) return;
-                        final nearest = centers.reduce(
-                          (a, b) =>
-                              (a.distanceMeters ?? double.infinity) <
-                                      (b.distanceMeters ?? double.infinity)
-                                  ? a
-                                  : b,
-                        );
-                        AppState.instance.targetCenter.value = nearest;
-                        AppState.instance.selectedTab.value = 1;
-                      },
-                    ),
-                  ],
+                          ),
+                        ),
+                        IconButton.filledTonal(
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          icon: const Icon(Icons.navigation_rounded),
+                          onPressed: () {
+                            AppState.instance.targetCenter.value = nearest;
+                            AppState.instance.selectedTab.value = 1;
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Active Vehicle Alerts Card
+            // Active Vehicle Alerts Cards
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Recent Vehicle Alerts',
+                const Text(
+                  'Recent Alerts',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: scheme.primary,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 ValueListenableBuilder<List<VehicleAlert>>(
                   valueListenable: AppState.instance.alerts,
                   builder: (context, alerts, _) {
-                    return Text(
-                      '${alerts.length} active',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: scheme.onSurfaceVariant,
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${alerts.length} Active',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: scheme.onPrimaryContainer,
+                        ),
                       ),
                     );
                   },
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             ValueListenableBuilder<List<VehicleAlert>>(
               valueListenable: AppState.instance.alerts,
               builder: (context, alerts, _) {
                 if (alerts.isEmpty) {
                   return const Card(
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: EdgeInsets.all(20.0),
                       child: Center(
                         child: Text(
                           'No active alerts. Vehicle is operating smoothly!',
@@ -568,22 +739,56 @@ class HomePage extends StatelessWidget {
                 return Column(
                   children: alerts.map((alert) {
                     return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: alert.color.withValues(alpha: 0.2),
-                          child: Icon(alert.icon, color: alert.color),
-                        ),
-                        title: Text(
-                          alert.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(alert.message),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.check, size: 20),
-                          onPressed: () {
-                            AppState.instance.removeAlert(alert.id);
-                          },
+                      margin: const EdgeInsets.only(bottom: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: alert.color.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                alert.icon,
+                                color: alert.color,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    alert.title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    alert.message,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                AppState.instance.removeAlert(alert.id);
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );
