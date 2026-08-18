@@ -21,9 +21,7 @@ class _MapPageState extends State<MapPage> {
   bool _gettingLocation = false;
 
   final MapController _mapController = MapController();
-  // Shared state held in AppState
   late VoidCallback _targetListener;
-  // _highlightCenter was unused; remove field to avoid analyzer warning.
 
   @override
   void initState() {
@@ -32,7 +30,6 @@ class _MapPageState extends State<MapPage> {
     _targetListener = () {
       final c = AppState.instance.targetCenter.value;
       if (c != null) {
-        // move map to selected center. No setState needed because we don't store highlight locally.
         _mapController.move(c.location, 15.0);
       }
     };
@@ -52,7 +49,6 @@ class _MapPageState extends State<MapPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
       setState(() => _gettingLocation = false);
       return;
     }
@@ -82,7 +78,6 @@ class _MapPageState extends State<MapPage> {
       final base = LatLng(pos.latitude, pos.longitude);
       AppState.instance.deviceLocation.value = base;
       AppState.instance.generateCentersAround(base);
-      // move map to device location
       _mapController.move(_deviceLocation!, 15.0);
     } catch (e) {
       setState(() => _gettingLocation = false);
@@ -109,14 +104,42 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  // _simulateConnect removed — connect action is simulated elsewhere or omitted for this demo
+  void _centerOnDevice() {
+    if (_deviceLocation != null) {
+      _mapController.move(_deviceLocation!, 15.0);
+    } else {
+      _initDeviceLocation();
+    }
+  }
+
+  void _centerOnVehicle() {
+    if (_vehicleLocation != null) {
+      _mapController.move(_vehicleLocation!, 15.0);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tap on the map to set vehicle location first.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final distKm = _distanceKm();
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Car Tracker')),
+      appBar: AppBar(
+        title: const Text('Car Tracker Map'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.my_location),
+            tooltip: 'Find My Location',
+            onPressed: _initDeviceLocation,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(
@@ -144,7 +167,6 @@ class _MapPageState extends State<MapPage> {
                           builder: (context, target, _) {
                             ServiceCenter? nearest;
                             if (centers.isNotEmpty) {
-                              // avoid using reduce (can cause DDC runtime typing issues); use explicit loop
                               ServiceCenter curNearest = centers.first;
                               for (final s in centers) {
                                 if ((s.distanceMeters ?? double.infinity) <
@@ -162,10 +184,13 @@ class _MapPageState extends State<MapPage> {
                                   width: 80,
                                   height: 80,
                                   point: _deviceLocation!,
-                                  builder: (ctx) => const Icon(
-                                    Icons.my_location,
-                                    color: Colors.blue,
-                                    size: 32,
+                                  builder: (ctx) => Tooltip(
+                                    message: 'My Location',
+                                    child: const Icon(
+                                      Icons.my_location,
+                                      color: Colors.blue,
+                                      size: 32,
+                                    ),
                                   ),
                                 ),
                               );
@@ -176,10 +201,13 @@ class _MapPageState extends State<MapPage> {
                                   width: 80,
                                   height: 80,
                                   point: _vehicleLocation!,
-                                  builder: (ctx) => const Icon(
-                                    Icons.local_taxi,
-                                    color: Colors.red,
-                                    size: 32,
+                                  builder: (ctx) => Tooltip(
+                                    message: 'Vehicle Position',
+                                    child: const Icon(
+                                      Icons.directions_car_filled,
+                                      color: Colors.red,
+                                      size: 36,
+                                    ),
                                   ),
                                 ),
                               );
@@ -220,7 +248,6 @@ class _MapPageState extends State<MapPage> {
                         );
                       },
                     ),
-                    // draw a line between base (vehicle or device) and highlighted center
                     ValueListenableBuilder<ServiceCenter?>(
                       valueListenable: AppState.instance.targetCenter,
                       builder: (context, target, _) {
@@ -232,7 +259,7 @@ class _MapPageState extends State<MapPage> {
                             Polyline(
                               points: [base, target.location],
                               strokeWidth: 4.0,
-                              color: Colors.blue.withOpacity(0.6),
+                              color: Colors.blue.withValues(alpha: 0.7),
                             ),
                           ],
                         );
@@ -240,7 +267,50 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ),
-                // Selected Center Info Overlay
+
+                // Floating Map Action Quick Controls
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: Column(
+                    children: [
+                      FloatingActionButton.small(
+                        heroTag: 'fab_my_loc',
+                        onPressed: _centerOnDevice,
+                        tooltip: 'Center on Me',
+                        child: const Icon(Icons.my_location),
+                      ),
+                      const SizedBox(height: 8),
+                      FloatingActionButton.small(
+                        heroTag: 'fab_car_loc',
+                        onPressed: _centerOnVehicle,
+                        tooltip: 'Center on Vehicle',
+                        child: const Icon(Icons.directions_car),
+                      ),
+                      ValueListenableBuilder<ServiceCenter?>(
+                        valueListenable: AppState.instance.targetCenter,
+                        builder: (context, target, _) {
+                          if (target == null) return const SizedBox.shrink();
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: FloatingActionButton.small(
+                              heroTag: 'fab_clear_route',
+                              backgroundColor: scheme.errorContainer,
+                              foregroundColor: scheme.onErrorContainer,
+                              onPressed: () {
+                                AppState.instance.targetCenter.value = null;
+                              },
+                              tooltip: 'Clear Navigation Route',
+                              child: const Icon(Icons.close),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Selected Center Info Overlay Card
                 Positioned(
                   bottom: 16,
                   left: 16,
@@ -250,30 +320,26 @@ class _MapPageState extends State<MapPage> {
                     builder: (context, target, _) {
                       if (target == null) return const SizedBox.shrink();
                       return Card(
-                        elevation: 4,
+                        elevation: 6,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            child: const Icon(Icons.home_repair_service),
+                            backgroundColor: scheme.primaryContainer,
+                            child: Icon(
+                              Icons.navigation,
+                              color: scheme.onPrimaryContainer,
+                            ),
                           ),
                           title: Text(
                             target.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${(target.distanceMeters ?? 0).toStringAsFixed(0)}m away',
-                              ),
-                              Text(target.phoneNumber),
-                            ],
+                          subtitle: Text(
+                            '${(target.distanceMeters ?? 0).toStringAsFixed(0)}m away • ${target.address}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -313,33 +379,54 @@ class _MapPageState extends State<MapPage> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
+
+          // Map Status Info Panel
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            color: scheme.surface,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_gettingLocation) const Text('Getting device location...'),
-                if (!_gettingLocation && _deviceLocation == null)
+                if (_gettingLocation)
+                  const Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      SizedBox(width: 12),
+                      Text('Acquiring GPS location...'),
+                    ],
+                  )
+                else if (_deviceLocation == null)
                   const Text(
-                    'Device location unavailable. Enable location services.',
+                    'Device location unavailable. Tap map or enable location services.',
                   ),
                 if (_vehicleLocation == null)
-                  const Text(
-                    'Tap on the map to set the vehicle location (simulated).',
+                  Text(
+                    'Tip: Tap anywhere on the map to place/move vehicle pin.',
+                    style: TextStyle(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
                   )
                 else ...[
-                  Text(
-                    'Vehicle: ${_vehicleLocation!.latitude.toStringAsFixed(6)}, ${_vehicleLocation!.longitude.toStringAsFixed(6)}',
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Vehicle Location: ${_vehicleLocation!.latitude.toStringAsFixed(4)}, ${_vehicleLocation!.longitude.toStringAsFixed(4)}',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      if (distKm != null)
+                        Chip(
+                          label: Text('${distKm.toStringAsFixed(2)} km away'),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
                   ),
-                  if (distKm != null)
-                    Text('Distance: ${distKm.toStringAsFixed(2)} km'),
                 ],
-                const SizedBox(height: 8),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.my_location),
-                  label: const Text('Refresh my location'),
-                  onPressed: _initDeviceLocation,
-                ),
               ],
             ),
           ),
