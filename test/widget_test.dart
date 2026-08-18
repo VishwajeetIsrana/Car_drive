@@ -1,30 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:car_drive/main.dart';
+import 'package:car_drive/app_state.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  setUp(() {
+    AppState.instance.isLocked.value = true;
+    AppState.instance.selectedTab.value = 0;
+    AppState.instance.themeMode.value = ThemeMode.system;
+  });
+
+  testWidgets('App loads and displays main navigation shell', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify AppBar title is present on Home tab
+    expect(find.text('Car Telematics'), findsOneWidget);
+
+    // Verify Bottom Navigation Bar tabs
+    expect(find.text('Vehicle'), findsOneWidget);
+    expect(find.text('Map'), findsOneWidget);
+    expect(find.text('Service'), findsOneWidget);
+
+    // Verify Vehicle title/card details
+    expect(find.text('Tesla Model 3'), findsOneWidget);
+    expect(find.text('Vehicle Health'), findsOneWidget);
+  });
+
+  testWidgets('Navigation tab switching works', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    // Switch to Service tab
+    await tester.tap(find.text('Service'));
+    await tester.pump();
+
+    expect(find.text('Service Centers'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget); // Search bar
+
+    // Switch back to Vehicle tab
+    await tester.tap(find.text('Vehicle'));
+    await tester.pump();
+
+    expect(find.text('Tesla Model 3'), findsOneWidget);
+  });
+
+  testWidgets('Lock toggle updates state', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pump();
+
+    expect(find.text('Vehicle Locked'), findsOneWidget);
+
+    // Tap Unlock button
+    await tester.tap(find.text('Unlock'));
+    await tester.pump();
+
+    expect(AppState.instance.isLocked.value, false);
+    expect(find.text('Vehicle Unlocked'), findsAtLeastNWidgets(1));
   });
 }
